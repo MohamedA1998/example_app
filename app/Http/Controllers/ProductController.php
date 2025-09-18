@@ -13,7 +13,14 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $product = Product::latest('id')->get();
+        $product = Product::latest('id')
+            ->when(request('min_price'), function ($query) {
+                $query->where('price', '>=', request('min_price'));
+            })
+            ->when(request('max_price'), function ($query) {
+                $query->where('price', '<=', request('max_price'));
+            })
+            ->get();
 
         return response()->json($product);
     }

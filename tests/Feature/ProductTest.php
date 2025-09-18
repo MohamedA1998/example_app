@@ -32,7 +32,22 @@ class ProductTest extends TestCase
         $this->assertDatabaseHas('products', $data);
     }
 
-    /** @test */
+    public function test_can_filter_products_by_min_and_max_price()
+    {
+        // منتجات بأسعار مختلفة
+        Product::factory()->create(['price' => 50]);
+        Product::factory()->create(['price' => 100]);
+        Product::factory()->create(['price' => 150]);
+
+        // فلترة بين 60 و 120
+        $response = $this->getJson('/api/product?min_price=60&max_price=120');
+
+        $response->assertStatus(200)
+            ->assertJsonCount(1) // منتج واحد بس في النطاق
+            ->assertJsonFragment(['price' => 100]);
+    }
+
+
     public function test_can_list_products()
     {
         Product::factory()->count(3)->create();
@@ -58,7 +73,6 @@ class ProductTest extends TestCase
             ]);
     }
 
-    // /** @test */
     public function test_can_update_a_product()
     {
         $product = Product::factory()->create();
@@ -82,7 +96,6 @@ class ProductTest extends TestCase
         $this->assertDatabaseHas('products', $updatedData);
     }
 
-    // /** @test */
     public function test_can_delete_a_product()
     {
         $product = Product::factory()->create();
